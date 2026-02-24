@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>새 탭</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 배경 애니메이션 효과 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 20s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes moveBackground {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* 글래스모피즘 컨테이너 */
+        .glass-container {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 시계 및 인사말 */
+        .greeting-section {
+            text-align: center;
+            padding: 60px 20px 30px;
+            color: white;
+        }
+
+        .time-display {
+            font-size: 72px;
+            font-weight: 300;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+            letter-spacing: -2px;
+        }
+
+        .greeting-text {
+            font-size: 28px;
+            font-weight: 500;
+            opacity: 0.95;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 글래스 검색창 */
+        .search-container {
+            display: flex;
+            justify-content: center;
+            padding: 0 20px 40px;
+        }
+
+        .glass-search-box {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 18px 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .glass-search-box:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .glass-search-box:focus-within {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .search-icon {
+            color: white;
+            font-size: 20px;
+            opacity: 0.8;
+        }
+
+        .glass-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: white;
+            font-size: 17px;
+            font-weight: 400;
+        }
+
+        .glass-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .voice-btn-glass {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .voice-btn-glass:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .voice-btn-glass.recording {
+            background: rgba(255, 59, 48, 0.9);
+            animation: pulseGlow 1.5s infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 15px rgba(255, 59, 48, 0);
+            }
+        }
+
+        /* 컨텐츠 래퍼 */
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px 40px;
+        }
+
+        /* 글래스 탭 */
+        .glass-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .glass-tab {
+            padding: 12px 28px;
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .glass-tab:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+        }
+
+        .glass-tab.active {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 통계 카드 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-glass-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s ease;
+        }
+
+        .stat-glass-card:hover::before {
+            left: 100%;
+        }
+
+        .stat-glass-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .stat-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+
+        /* 필터 칩 */
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-glass-chip {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .filter-glass-chip:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .filter-glass-chip.active {
+            background: rgba(255, 255, 255, 0.35);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.3);
+        }
+
+        /* 리스트 뷰 */
+        .list-view {
+            display: block;
+        }
+
+        .list-view.hidden {
+            display: none;
+        }
+
+        .todo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .todo-glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 18px;
+            padding: 18px 20px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .todo-glass-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--priority-color);
+            transition: width 0.3s ease;
+        }
+
+        .todo-glass-card:hover {
+            background: rgba(255, 255, 255, 0.22);
+            transform: translateX(4px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        .todo-glass-card:hover::before {
+            width: 6px;
+        }
+
+        .todo-glass-card.completed {
+            opacity: 0.6;
+        }
+
+        .todo-glass-card.priority-high {
+            --priority-color: #FF3B30;
+        }
+
+        .todo-glass-card.priority-medium {
+            --priority-color: #FF9500;
+        }
+
+        .todo-glass-card.priority-low {
+            --priority-color: #34C759;
+        }
+
+        .glass-checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: rgba(255, 255, 255, 0.5);
+            filter: brightness(1.2);
+        }
+
+        .todo-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .todo-title {
+            font-size: 16px;
+            color: white;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .todo-glass-card.completed .todo-title {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .todo-meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .todo-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .priority-badge-glass {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        .priority-high { color: #FF3B30; }
+        .priority-medium { color: #FF9500; }
+        .priority-low { color: #34C759; }
+
+        .todo-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .glass-action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .glass-action-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.1);
+        }
+
+        .glass-action-btn.delete:hover {
+            background: rgba(255, 59, 48, 0.8);
+        }
+
+        /* 캘린더 뷰 */
+        .calendar-view {
+            display: none;
+        }
+
+        .calendar-view.active {
+            display: block;
+        }
+
+        .calendar-glass-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 20px 24px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .calendar-nav button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .calendar-nav button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .calendar-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+            margin: 0 20px;
+        }
+
+        .today-btn-glass {
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .today-btn-glass:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            padding: 12px 8px;
+            font-weight: 600;
+            color: white;
+            font-size: 13px;
+        }
+
+        .calendar-glass-day {
+            min-height: 110px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .calendar-glass-day:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .calendar-glass-day.other-month {
+            opacity: 0.4;
+        }
+
+        .calendar-glass-day.today {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .calendar-day-number {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .calendar-glass-day.today .calendar-day-number {
+            color: #FFD60A;
+            text-shadow: 0 0 10px rgba(255, 214, 10, 0.5);
+        }
+
+        .calendar-tasks {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .calendar-task-glass {
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 11px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            font-weight: 500;
+            border-left: 3px solid var(--task-color);
+        }
+
+        .calendar-task-glass.priority-high { --task-color: #FF3B30; }
+        .calendar-task-glass.priority-medium { --task-color: #FF9500; }
+        .calendar-task-glass.priority-low { --task-color: #34C759; }
+
+        .calendar-task-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        /* 모달 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-glass-content {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-header h2 {
+            font-size: 22px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 59, 48, 0.8);
+            transform: scale(1.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: white;
+            font-size: 14px;
+        }
+
+        .glass-input-field {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            font-size: 15px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .glass-input-field::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .glass-input-field:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.22);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 28px;
+        }
+
+        .glass-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .glass-btn.primary {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .glass-btn.primary:hover {
+            background: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2);
+        }
+
+        .glass-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .glass-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: white;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.4;
+        }
+
+        .empty-state p {
+            font-size: 18px;
+            opacity: 0.8;
+        }
+
+        .clear-btn-glass {
+            margin-top: 20px;
+            padding: 12px 24px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 59, 48, 0.5);
+            background: rgba(255, 59, 48, 0.2);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .clear-btn-glass:hover {
+            background: rgba(255, 59, 48, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(255, 59, 48, 0.3);
+        }
+
+        .detail-todo-glass {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 14px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--detail-color);
+        }
+
+        .detail-todo-glass.priority-high { --detail-color: #FF3B30; }
+        .detail-todo-glass.priority-medium { --detail-color: #FF9500; }
+        .detail-todo-glass.priority-low { --detail-color: #34C759; }
+
+        .detail-todo-title {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .detail-todo-meta {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* 스크롤바 스타일 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .time-display {
+                font-size: 48px;
+            }
+
+            .greeting-text {
+                font-size: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .calendar-grid {
+                gap: 6px;
+                padding: 12px;
+            }
+
+            .calendar-glass-day {
+                min-height: 80px;
+                padding: 8px;
+            }
+
+            .calendar-task-glass {
+                display: none;
+            }
+
+            .glass-tabs {
+                width: 100%;
+            }
+        }
+
+        /* 애니메이션 추가 */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .stat-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .stat-glass-card:nth-child(1) .stat-icon { animation-delay: 0s; }
+        .stat-glass-card:nth-child(2) .stat-icon { animation-delay: 0.2s; }
+        .stat-glass-card:nth-child(3) .stat-icon { animation-delay: 0.4s; }
+        .stat-glass-card:nth-child(4) .stat-icon { animation-delay: 0.6s; }
+    </style>
+</head>
+<body>
+    <div class="glass-container">
+        <!-- 인사말 및 시계 -->
+        <div class="greeting-section">
+            <div class="time-display" id="currentTime">00:00</div>
+            <div class="greeting-text" id="greetingText">좋은 하루 되세요</div>
+        </div>
+
+        <!-- 글래스 검색창 -->
+        <div class="search-container">
+            <div class="glass-search-box">
+                <i class="fas fa-plus-circle search-icon"></i>
+                <input type="text" class="glass-input" id="voiceInput" placeholder="할 일을 말하거나 입력하세요...">
+                <button class="voice-btn-glass" id="voiceBtn">
+                    <i class="fas fa-microphone"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 컨텐츠 -->
+        <div class="content-wrapper">
+            <!-- 통계 카드 -->
+            <div class="stats-grid">
+                <div class="stat-glass-card">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-value" id="totalCount">0</div>
+                    <div class="stat-label">전체</div>
+                </div>
+                <div class="stat-glass-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-value" id="completedCount">0</div>
+                    <div class="stat-label">완료</div>
+                </div>
+                <div class="stat-glass-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-value" id="pendingCount">0</div>
+                    <div class="stat-label">진행중</div>
+                </div>
+                <div class="stat-glass-card">
+                    <div class="stat-icon">🎯</div>
+                    <div class="stat-value" id="completionRate">0%</div>
+                    <div class="stat-label">완료율</div>
+                </div>
+            </div>
+
+            <!-- 탭 -->
+            <div class="glass-tabs">
+                <button class="glass-tab active" data-view="list">
+                    <i class="fas fa-list"></i> 할 일
+                </button>
+                <button class="glass-tab" data-view="calendar">
+                    <i class="fas fa-calendar-alt"></i> 캘린더
+                </button>
+            </div>
+
+            <!-- 필터 -->
+            <div class="filters">
+                <button class="filter-glass-chip active" data-filter="all">전체</button>
+                <button class="filter-glass-chip" data-filter="pending">진행중</button>
+                <button class="filter-glass-chip" data-filter="completed">완료</button>
+                <button class="filter-glass-chip" data-filter="work">💼 업무</button>
+                <button class="filter-glass-chip" data-filter="personal">🏃 개인</button>
+                <button class="filter-glass-chip" data-filter="other">📌 기타</button>
+                <button class="filter-glass-chip" data-filter="high">🔴 높음</button>
+                <button class="filter-glass-chip" data-filter="medium">🟡 중간</button>
+                <button class="filter-glass-chip" data-filter="low">🟢 낮음</button>
+            </div>
+
+            <!-- 리스트 뷰 -->
+            <div class="list-view" id="listView">
+                <div class="todo-list" id="todoList"></div>
+                <button class="clear-btn-glass" id="clearCompletedBtn" style="display: none;">
+                    <i class="fas fa-trash"></i> 완료된 항목 삭제
+                </button>
+            </div>
+
+            <!-- 캘린더 뷰 -->
+            <div class="calendar-view" id="calendarView">
+                <div class="calendar-glass-header">
+                    <div class="calendar-nav">
+                        <button id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+                        <h2 class="calendar-title" id="calendarTitle">2024년 1월</h2>
+                        <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <button class="today-btn-glass" id="todayBtn">오늘</button>
+                </div>
+                <div class="calendar-grid" id="calendarGrid">
+                    <div class="calendar-day-header">일</div>
+                    <div class="calendar-day-header">월</div>
+                    <div class="calendar-day-header">화</div>
+                    <div class="calendar-day-header">수</div>
+                    <div class="calendar-day-header">목</div>
+                    <div class="calendar-day-header">금</div>
+                    <div class="calendar-day-header">토</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 할일 수정 모달 -->
+    <div class="modal" id="editModal">
+        <div class="modal-glass-content">
+            <div class="modal-header">
+                <h2>할 일 수정</h2>
+                <button class="modal-close" id="closeEditModal"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="editForm">
+                <div class="form-group">
+                    <label>제목</label>
+                    <input type="text" class="glass-input-field" id="editTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>마감일</label>
+                    <input type="datetime-local" class="glass-input-field" id="editDeadline">
+                </div>
+                <div class="form-group">
+                    <label>우선순위</label>
+                    <select class="glass-input-field" id="editPriority">
+                        <option value="high">높음</option>
+                        <option value="medium">중간</option>
+                        <option value="low">낮음</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>카테고리</label>
+                    <select class="glass-input-field" id="editCategory">
+                        <option value="work">업무</option>
+                        <option value="personal">개인</option>
+                        <option value="other">기타</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="glass-btn secondary" id="cancelEdit">취소</button>
+                    <button type="submit" class="glass-btn primary">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 날짜별 할일 상세 모달 -->
+    <div class="modal" id="dayDetailModal">
+        <div class="modal-glass-content">
+            <div class="modal-header">
+                <h2 id="dayDetailTitle">2024년 1월 1일</h2>
+                <button class="modal-close" id="closeDayDetail"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="dayDetailContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // 전역 변수
+        let todos = JSON.parse(localStorage.getItem('todos')) || [];
+        let currentFilter = 'all';
+        let currentEditId = null;
+        let recognition = null;
+        let currentView = 'list';
+        let currentDate = new Date();
+
+        // 시계 업데이트
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('currentTime').textContent = `${hours}:${minutes}`;
+
+            // 인사말 업데이트
+            const hour = now.getHours();
+            let greeting = '좋은 하루 되세요';
+            if (hour >= 5 && hour < 12) greeting = '좋은 아침이에요 ☀️';
+            else if (hour >= 12 && hour < 18) greeting = '좋은 오후에요 🌤️';
+            else if (hour >= 18 && hour < 22) greeting = '좋은 저녁이에요 🌙';
+            else greeting = '편안한 밤 되세요 ✨';
+            
+            document.getElementById('greetingText').textContent = greeting;
+        }
+
+        // 음성 인식 초기화
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.lang = 'ko-KR';
+            recognition.continuous = true;
+            recognition.interimResults = true;
+        }
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            updateClock();
+            setInterval(updateClock, 1000);
+            initializeApp();
+            setupEventListeners();
+            renderTodos();
+            updateStats();
+            renderCalendar();
+        });
+
+        function initializeApp() {
+            if (recognition) {
+                const voiceBtn = document.getElementById('voiceBtn');
+                const voiceInput = document.getElementById('voiceInput');
+
+                recognition.onstart = () => {
+                    voiceBtn.classList.add('recording');
+                    voiceInput.placeholder = '듣고 있습니다...';
+                };
+
+                recognition.onresult = (event) => {
+                    let interimTranscript = '';
+                    let finalTranscript = '';
+
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcriptPiece = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            finalTranscript += transcriptPiece;
+                        } else {
+                            interimTranscript += transcriptPiece;
+                        }
+                    }
+
+                    voiceInput.value = finalTranscript || interimTranscript;
+
+                    if (finalTranscript) {
+                        parseAndAddTodos(finalTranscript);
+                    }
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('음성 인식 오류:', event.error);
+                    voiceBtn.classList.remove('recording');
+                    voiceInput.placeholder = '할 일을 말하거나 입력하세요...';
+                };
+
+                recognition.onend = () => {
+                    voiceBtn.classList.remove('recording');
+                    voiceInput.placeholder = '할 일을 말하거나 입력하세요...';
+                };
+            }
+
+            document.getElementById('voiceInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && e.target.value.trim()) {
+                    parseAndAddTodos(e.target.value);
+                    e.target.value = '';
+                }
+            });
+        }
+
+        function setupEventListeners() {
+            document.getElementById('voiceBtn').addEventListener('click', toggleVoiceRecognition);
+
+            document.querySelectorAll('.glass-tab').forEach(tab => {
+                tab.addEventListener('click', () => switchView(tab.dataset.view));
+            });
+
+            document.querySelectorAll('.filter-glass-chip').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-glass-chip').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentFilter = btn.dataset.filter;
+                    renderTodos();
+                    renderCalendar();
+                });
+            });
+
+            document.getElementById('clearCompletedBtn').addEventListener('click', clearCompleted);
+            document.getElementById('closeEditModal').addEventListener('click', closeEditModal);
+            document.getElementById('cancelEdit').addEventListener('click', closeEditModal);
+            document.getElementById('editForm').addEventListener('submit', saveEdit);
+            document.getElementById('closeDayDetail').addEventListener('click', closeDayDetailModal);
+            document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
+            document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
+            document.getElementById('todayBtn').addEventListener('click', goToToday);
+        }
+
+        function toggleVoiceRecognition() {
+            if (!recognition) {
+                alert('음성 인식을 지원하지 않는 브라우저입니다. Chrome 또는 Edge를 사용해주세요.');
+                return;
+            }
+
+            const voiceBtn = document.getElementById('voiceBtn');
+            if (voiceBtn.classList.contains('recording')) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        }
+
+        function switchView(view) {
+            currentView = view;
+            document.querySelectorAll('.glass-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.view === view);
+            });
+
+            const listView = document.getElementById('listView');
+            const calendarView = document.getElementById('calendarView');
+
+            if (view === 'list') {
+                listView.classList.remove('hidden');
+                calendarView.classList.remove('active');
+            } else {
+                listView.classList.add('hidden');
+                calendarView.classList.add('active');
+                renderCalendar();
+            }
+        }
+
+        function parseAndAddTodos(text) {
+            const sentences = text.split(/[,，.。]/).map(s => s.trim()).filter(s => s.length > 0);
+            
+            sentences.forEach(sentence => {
+                const todo = {
+                    id: Date.now() + Math.random(),
+                    title: sentence,
+                    completed: false,
+                    deadline: parseDeadline(sentence),
+                    priority: parsePriority(sentence),
+                    category: parseCategory(sentence),
+                    createdAt: new Date().toISOString()
+                };
+
+                todo.title = cleanTitle(sentence);
+                todos.push(todo);
+            });
+
+            saveTodos();
+            renderTodos();
+            updateStats();
+            renderCalendar();
+        }
+
+        function parseDeadline(text) {
+            const now = new Date();
+            
+            const timeMatch = text.match(/(\d{1,2})시/);
+            let hour = timeMatch ? parseInt(timeMatch[1]) : 9;
+            
+            const minuteMatch = text.match(/(\d{1,2})분/);
+            let minute = minuteMatch ? parseInt(minuteMatch[1]) : 0;
+
+            if (text.includes('오후') && hour < 12) hour += 12;
+            if (text.includes('오전') && hour === 12) hour = 0;
+
+            if (text.includes('내일')) {
+                const tomorrow = new Date(now);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setHours(hour, minute, 0, 0);
+                return tomorrow.toISOString();
+            }
+
+            if (text.includes('모레')) {
+                const dayAfter = new Date(now);
+                dayAfter.setDate(dayAfter.getDate() + 2);
+                dayAfter.setHours(hour, minute, 0, 0);
+                return dayAfter.toISOString();
+            }
+
+            const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+            for (let i = 0; i < days.length; i++) {
+                if (text.includes(days[i])) {
+                    const target = new Date(now);
+                    const currentDay = target.getDay();
+                    let daysToAdd = i - currentDay;
+                    if (daysToAdd <= 0) daysToAdd += 7;
+                    target.setDate(target.getDate() + daysToAdd);
+                    target.setHours(hour, minute, 0, 0);
+                    return target.toISOString();
+                }
+            }
+
+            if (text.includes('다음 주')) {
+                const nextWeek = new Date(now);
+                nextWeek.setDate(nextWeek.getDate() + 7);
+                nextWeek.setHours(hour, minute, 0, 0);
+                return nextWeek.toISOString();
+            }
+
+            if (text.includes('주말')) {
+                const saturday = new Date(now);
+                const daysUntilSaturday = 6 - saturday.getDay();
+                saturday.setDate(saturday.getDate() + (daysUntilSaturday <= 0 ? 7 + daysUntilSaturday : daysUntilSaturday));
+                saturday.setHours(10, 0, 0, 0);
+                return saturday.toISOString();
+            }
+
+            return null;
+        }
+
+        function parsePriority(text) {
+            if (text.includes('긴급') || text.includes('중요') || text.includes('빨리')) {
+                return 'high';
+            }
+            if (text.includes('여유') || text.includes('천천히')) {
+                return 'low';
+            }
+            return 'medium';
+        }
+
+        function parseCategory(text) {
+            const workKeywords = ['회의', '미팅', '프로젝트', '업무', '보고서', '기획', '발표', '코드', '리뷰'];
+            const personalKeywords = ['운동', '헬스', '조깅', '독서', '공부', '쇼핑', '청소', '요리'];
+
+            for (let keyword of workKeywords) {
+                if (text.includes(keyword)) return 'work';
+            }
+            for (let keyword of personalKeywords) {
+                if (text.includes(keyword)) return 'personal';
+            }
+            return 'other';
+        }
+
+        function cleanTitle(text) {
+            return text
+                .replace(/내일|모레|오늘|오전|오후|(\d{1,2})시|(\d{1,2})분/g, '')
+                .replace(/일요일|월요일|화요일|수요일|목요일|금요일|토요일/g, '')
+                .replace(/다음 주|주말|이번 주/g, '')
+                .replace(/긴급|중요|빨리|여유|천천히/g, '')
+                .replace(/까지/g, '')
+                .trim();
+        }
+
+        function renderTodos() {
+            const todoList = document.getElementById('todoList');
+            const filteredTodos = getFilteredTodos();
+
+            if (filteredTodos.length === 0) {
+                todoList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>할 일이 없습니다</p>
+                    </div>
+                `;
+                document.getElementById('clearCompletedBtn').style.display = 'none';
+                return;
+            }
+
+            todoList.innerHTML = filteredTodos.map(todo => `
+                <div class="todo-glass-card ${todo.completed ? 'completed' : ''} priority-${todo.priority}" data-id="${todo.id}">
+                    <input type="checkbox" class="glass-checkbox" ${todo.completed ? 'checked' : ''} 
+                           onchange="toggleTodo(${todo.id})">
+                    <div class="todo-content">
+                        <div class="todo-title">${todo.title}</div>
+                        <div class="todo-meta">
+                            ${todo.deadline ? `<div class="todo-meta-item"><i class="fas fa-clock"></i> ${formatDeadline(todo.deadline)}</div>` : ''}
+                            <div class="todo-meta-item">
+                                <div class="priority-badge-glass priority-${todo.priority}"></div>
+                                ${getPriorityText(todo.priority)}
+                            </div>
+                            <div class="todo-meta-item">
+                                ${getCategoryIcon(todo.category)} ${getCategoryText(todo.category)}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="todo-actions">
+                        <button class="glass-action-btn" onclick="editTodo(${todo.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="glass-action-btn delete" onclick="deleteTodo(${todo.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            const hasCompleted = todos.some(t => t.completed);
+            document.getElementById('clearCompletedBtn').style.display = hasCompleted ? 'block' : 'none';
+        }
+
+        function getFilteredTodos() {
+            return todos.filter(todo => {
+                if (currentFilter === 'all') return true;
+                if (currentFilter === 'pending') return !todo.completed;
+                if (currentFilter === 'completed') return todo.completed;
+                if (currentFilter === 'high' || currentFilter === 'medium' || currentFilter === 'low') {
+                    return todo.priority === currentFilter;
+                }
+                if (currentFilter === 'work' || currentFilter === 'personal' || currentFilter === 'other') {
+                    return todo.category === currentFilter;
+                }
+                return true;
+            });
+        }
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            document.getElementById('calendarTitle').textContent = `${year}년 ${month + 1}월`;
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const prevLastDay = new Date(year, month, 0);
+
+            const calendarGrid = document.getElementById('calendarGrid');
+            const headers = calendarGrid.querySelectorAll('.calendar-day-header');
+            calendarGrid.innerHTML = '';
+            headers.forEach(header => calendarGrid.appendChild(header));
+
+            const firstDayOfWeek = firstDay.getDay();
+            for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+                const day = prevLastDay.getDate() - i;
+                const dayElement = createCalendarDay(year, month - 1, day, true);
+                calendarGrid.appendChild(dayElement);
+            }
+
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const dayElement = createCalendarDay(year, month, day, false);
+                calendarGrid.appendChild(dayElement);
+            }
+
+            const totalCells = calendarGrid.children.length - 7;
+            const remainingCells = 42 - totalCells;
+            for (let day = 1; day <= remainingCells; day++) {
+                const dayElement = createCalendarDay(year, month + 1, day, true);
+                calendarGrid.appendChild(dayElement);
+            }
+        }
+
+        function createCalendarDay(year, month, day, isOtherMonth) {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'calendar-glass-day';
+            if (isOtherMonth) dayElement.classList.add('other-month');
+
+            const date = new Date(year, month, day);
+            const today = new Date();
+            if (date.toDateString() === today.toDateString()) {
+                dayElement.classList.add('today');
+            }
+
+            const dayTodos = getTodosForDate(date);
+            const filteredDayTodos = dayTodos.filter(todo => {
+                if (currentFilter === 'all') return true;
+                if (currentFilter === 'pending') return !todo.completed;
+                if (currentFilter === 'completed') return todo.completed;
+                if (['high', 'medium', 'low'].includes(currentFilter)) return todo.priority === currentFilter;
+                if (['work', 'personal', 'other'].includes(currentFilter)) return todo.category === currentFilter;
+                return true;
+            });
+
+            dayElement.innerHTML = `
+                <div class="calendar-day-number">${day}</div>
+                <div class="calendar-tasks">
+                    ${filteredDayTodos.slice(0, 3).map(todo => `
+                        <div class="calendar-task-glass priority-${todo.priority}">
+                            ${todo.completed ? '✓ ' : ''}${todo.title}
+                        </div>
+                    `).join('')}
+                </div>
+                ${filteredDayTodos.length > 3 ? `<div class="calendar-task-badge">+${filteredDayTodos.length - 3}</div>` : ''}
+            `;
+
+            dayElement.addEventListener('click', () => showDayDetail(date, filteredDayTodos));
+
+            return dayElement;
+        }
+
+        function getTodosForDate(date) {
+            return todos.filter(todo => {
+                if (!todo.deadline) return false;
+                const todoDate = new Date(todo.deadline);
+                return todoDate.toDateString() === date.toDateString();
+            });
+        }
+
+        function showDayDetail(date, dayTodos) {
+            const modal = document.getElementById('dayDetailModal');
+            const title = document.getElementById('dayDetailTitle');
+            const content = document.getElementById('dayDetailContent');
+
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            const dayName = ['일', '월', '화', '수', '목', '금', '토'][date.getDay()];
+
+            title.textContent = `${year}년 ${month}월 ${day}일 (${dayName})`;
+
+            if (dayTodos.length === 0) {
+                content.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-check"></i>
+                        <p>이 날짜에 할 일이 없습니다</p>
+                    </div>
+                `;
+            } else {
+                content.innerHTML = dayTodos.map(todo => `
+                    <div class="detail-todo-glass priority-${todo.priority}">
+                        <div class="detail-todo-title">
+                            ${todo.completed ? '✅ ' : '⭕ '}${todo.title}
+                        </div>
+                        <div class="detail-todo-meta">
+                            <span><div class="priority-badge-glass priority-${todo.priority}" style="display: inline-block; vertical-align: middle;"></div> ${getPriorityText(todo.priority)}</span>
+                            <span>${getCategoryIcon(todo.category)} ${getCategoryText(todo.category)}</span>
+                            ${todo.deadline ? `<span><i class="fas fa-clock"></i> ${formatTime(todo.deadline)}</span>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeDayDetailModal() {
+            document.getElementById('dayDetailModal').classList.remove('active');
+        }
+
+        function changeMonth(delta) {
+            currentDate.setMonth(currentDate.getMonth() + delta);
+            renderCalendar();
+        }
+
+        function goToToday() {
+            currentDate = new Date();
+            renderCalendar();
+        }
+
+        function toggleTodo(id) {
+            const todo = todos.find(t => t.id === id);
+            if (todo) {
+                todo.completed = !todo.completed;
+                saveTodos();
+                renderTodos();
+                updateStats();
+                renderCalendar();
+            }
+        }
+
+        function editTodo(id) {
+            const todo = todos.find(t => t.id === id);
+            if (!todo) return;
+
+            currentEditId = id;
+            document.getElementById('editTitle').value = todo.title;
+            document.getElementById('editPriority').value = todo.priority;
+            document.getElementById('editCategory').value = todo.category;
+            
+            if (todo.deadline) {
+                const date = new Date(todo.deadline);
+                const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+                document.getElementById('editDeadline').value = localDate.toISOString().slice(0, 16);
+            } else {
+                document.getElementById('editDeadline').value = '';
+            }
+
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+            currentEditId = null;
+        }
+
+        function saveEdit(e) {
+            e.preventDefault();
+            const todo = todos.find(t => t.id === currentEditId);
+            if (!todo) return;
+
+            todo.title = document.getElementById('editTitle').value;
+            todo.priority = document.getElementById('editPriority').value;
+            todo.category = document.getElementById('editCategory').value;
+            
+            const deadlineValue = document.getElementById('editDeadline').value;
+            todo.deadline = deadlineValue ? new Date(deadlineValue).toISOString() : null;
+
+            saveTodos();
+            renderTodos();
+            updateStats();
+            renderCalendar();
+            closeEditModal();
+        }
+
+        function deleteTodo(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                todos = todos.filter(t => t.id !== id);
+                saveTodos();
+                renderTodos();
+                updateStats();
+                renderCalendar();
+            }
+        }
+
+        function clearCompleted() {
+            if (confirm('완료된 모든 항목을 삭제하시겠습니까?')) {
+                todos = todos.filter(t => !t.completed);
+                saveTodos();
+                renderTodos();
+                updateStats();
+                renderCalendar();
+            }
+        }
+
+        function updateStats() {
+            const total = todos.length;
+            const completed = todos.filter(t => t.completed).length;
+            const pending = total - completed;
+            const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('completionRate').textContent = rate + '%';
+        }
+
+        function saveTodos() {
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+
+        function formatDeadline(isoString) {
+            const date = new Date(isoString);
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            
+            const diffTime = targetDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            const timeStr = `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+
+            if (diffDays === 0) return `오늘 ${timeStr}`;
+            if (diffDays === 1) return `내일 ${timeStr}`;
+            if (diffDays === -1) return `어제 ${timeStr}`;
+            
+            return `${date.getMonth() + 1}/${date.getDate()} ${timeStr}`;
+        }
+
+        function formatTime(isoString) {
+            const date = new Date(isoString);
+            return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        }
+
+        function getPriorityText(priority) {
+            const map = { high: '높음', medium: '중간', low: '낮음' };
+            return map[priority] || '중간';
+        }
+
+        function getCategoryText(category) {
+            const map = { work: '업무', personal: '개인', other: '기타' };
+            return map[category] || '기타';
+        }
+
+        function getCategoryIcon(category) {
+            const map = { work: '💼', personal: '🏃', other: '📌' };
+            return map[category] || '📌';
+        }
+
+        // 모달 외부 클릭 시 닫기
+        document.getElementById('editModal').addEventListener('click', function(e) {
+            if (e.target === this) closeEditModal();
+        });
+
+        document.getElementById('dayDetailModal').addEventListener('click', function(e) {
+            if (e.target === this) closeDayDetailModal();
+        });
+    </script>
+</body>
+</html>
