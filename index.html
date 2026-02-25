@@ -1084,7 +1084,7 @@
         if ('webkitSpeechRecognition' in window) {
             recognition = new webkitSpeechRecognition();
             recognition.lang = 'ko-KR';
-            recognition.continuous = true;
+            recognition.continuous = false; // 한 번만 인식
             recognition.interimResults = true;
         }
 
@@ -1122,10 +1122,14 @@
                         }
                     }
 
+                    // 화면에는 중간 결과도 표시 (미리보기용)
                     voiceInput.value = finalTranscript || interimTranscript;
 
+                    // 최종 결과일 때만 할 일 추가
                     if (finalTranscript) {
                         parseAndAddTodos(finalTranscript);
+                        voiceInput.value = ''; // 입력창 비우기
+                        recognition.stop(); // 음성 인식 중지
                     }
                 };
 
